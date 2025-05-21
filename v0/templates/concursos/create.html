@@ -1,0 +1,310 @@
+{{ define "content" }}
+<div class="concurso-form-container">
+    <h2>Criar Concurso</h2>
+    
+    <form action="/save-concurso" method="POST" class="concurso-form">
+        <div class="form-section">
+            <h3>Informações Básicas</h3>
+            
+            <div class="form-group">
+                <label for="referencia">Referência:</label>
+                <input type="text" id="referencia" name="referencia" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="entidade">Entidade:</label>
+                <input type="text" id="entidade" name="entidade" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="preco">Preço:</label>
+                <input type="number" id="preco" name="preco" step="0.01">
+            </div>
+            
+            <div class="form-group">
+                <label for="referencia_bc">Referência BC:</label>
+                <input type="text" id="referencia_bc" name="referencia_bc">
+            </div>
+            
+            <div class="form-group">
+                <label for="tipo_id">Tipo:</label>
+                <select id="tipo_id" name="tipo_id" required>
+                    <option value="1"></option>
+                    {{range .Tipos}}
+                    <option value="{{.ID}}">{{.Descricao}}</option>
+                    {{end}}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="plataforma_id">Plataforma:</label>
+                <select id="plataforma_id" name="plataforma_id" required>
+                    <option value="1"></option>
+                    {{range .Plataformas}}
+                    <option value="{{.ID}}">{{.Descricao}}</option>
+                    {{end}}
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Esclarecimentos/Erros</h3>
+            
+            <div class="date-time-group">
+                <div class="form-group">
+                    <label for="dia_erro">Data:</label>
+                    <input type="date" id="dia_erro" name="dia_erro">
+                </div>
+                
+                <div class="form-group">
+                    <label for="hora_erro">Hora:</label>
+                    <input type="time" id="hora_erro" name="hora_erro">
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Proposta</h3>
+            
+            <div class="date-time-group">
+                <div class="form-group">
+                    <label for="dia_proposta">Data:</label>
+                    <input type="date" id="dia_proposta" name="dia_proposta">
+                </div>
+                
+                <div class="form-group">
+                    <label for="hora_proposta">Hora:</label>
+                    <input type="time" id="hora_proposta" name="hora_proposta">
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Relatório</h3>
+            
+            <div class="checkbox-group">
+                <label for="preliminar">
+                    <input type="checkbox" id="preliminar" name="preliminar">
+                    Relatório Preliminar
+                </label>
+            </div>
+            
+            <h4>Audiência Prévia</h4>
+            <div class="date-time-group">
+                <div class="form-group">
+                    <label for="dia_audiencia">Data:</label>
+                    <input type="date" id="dia_audiencia" name="dia_audiencia">
+                </div>
+                
+                <div class="form-group">
+                    <label for="hora_audiencia">Hora:</label>
+                    <input type="time" id="hora_audiencia" name="hora_audiencia">
+                </div>
+            </div>
+            
+            <div class="checkbox-group">
+                <label for="final">
+                    <input type="checkbox" id="final" name="final">
+                    Relatório Final
+                </label>
+                
+                <label for="recurso">
+                    <input type="checkbox" id="recurso" name="recurso">
+                    Recurso
+                </label>
+                
+                <label for="impugnacao">
+                    <input type="checkbox" id="impugnacao" name="impugnacao">
+                    Impugnação
+                </label>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Estado</h3>
+            
+            <div class="form-group">
+                <label for="estado_id">Estado:</label>
+                <select id="estado_id" name="estado_id" required>
+                    <option value="2"></option>
+                    {{range .Estados}}
+                    <option value="{{.ID}}">{{.Descricao}}</option>
+                    {{end}}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="adjudicatario_id">Adjudicatário:</label>
+                <select id="adjudicatario_id" name="adjudicatario_id">
+                    <option value="1"></option>
+                    {{range .Resultado}}
+                    <option value="{{.ID}}">{{.Descricao}}</option>
+                    {{end}}
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit">Criar</button>
+            <a href="/concursos" class="back-link">Voltar à lista de concursos</a>
+        </div>
+    </form>
+</div>
+{{ end }}
+
+{{ define "styles" }}
+<style>
+.concurso-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.concurso-form-container h2 {
+    color: #3182ce;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.concurso-form {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.form-section h3 {
+    color: #334155;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.form-section h4 {
+    color: #4a5568;
+    margin: 1rem 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus,
+.form-group input[type="date"]:focus,
+.form-group input[type="time"]:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.date-time-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.date-time-group .form-group {
+    flex: 1;
+}
+
+.checkbox-group {
+    margin: 1rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin-right: 0.5rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: #2563eb;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-actions button {
+    background-color: #3182ce;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.form-actions button:hover {
+    background-color: #1e568a;
+}
+
+.back-link {
+    display: inline-block;
+    text-align: center;
+    color: #3182ce;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .concurso-form {
+        padding: 1.5rem;
+    }
+
+    .date-time-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+{{ end }}

@@ -1,0 +1,142 @@
+{{ define "content" }}
+<div class="concursos-ordered-container">
+
+    <div class="actions">
+        <a href="/concursos-ordenados" class="button">Atualizar</a>
+        <a href="/download-pdf" class="button">Download PDF</a>
+        <div class="header-info">
+            <div>Atualizado em: {{.CurrentTime}}</div>
+            <div>            
+                <a href="/concursos">SAV</a>
+            </div>
+        </div>
+    </div>
+    
+    <table class="concursos-table">
+        <thead>
+            <tr>
+                <th>Referência</th>
+                <th>Entidade</th>
+                <th>Objeto</th>
+                <th>Data</th>
+                <th>Hora</th>
+                <th>Tipo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Items}}
+            <tr class="{{if eq .DiasRestantes 0}}urgente{{else if eq .DiasRestantes 1}}alerta{{end}}">
+                <td>{{.Referencia}}</td>
+                <td>{{.Entidade}}</td>
+                <td>
+                    {{if eq .Objeto 1}}{{end}}
+                    {{if eq .Objeto 2}}CTE{{end}}
+                    {{if eq .Objeto 3}}CON{{end}}
+                    {{if eq .Objeto 4}}INF{{end}}
+                    {{if eq .Objeto 5}}CI{{end}}
+                    {{if eq .Objeto 6}}ROB{{end}}
+                </td>
+                <td>{{.Data}}</td>
+                <td>{{.Hora}}</td>
+                <td>{{.Tipo}}</td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="7" style="text-align: center;">Nenhum concurso futuro encontrado</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{ end }}
+
+{{ define "styles" }}
+<style>
+.concursos-ordered-container {
+    width: 100%;
+}
+
+.header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-info h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.header-info div {
+    color: #4a5568;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.actions {
+    margin-bottom: 20px;
+}
+
+.actions .button {
+    margin-right: 10px;
+}
+
+.concursos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.concursos-table th, 
+.concursos-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.concursos-table th {
+    background-color: #3182ce;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.concursos-table tr:last-child td {
+    border-bottom: none;
+}
+
+.concursos-table tr.urgente {
+    background-color: #ff5656; /* Vermelho claro */
+}
+
+.concursos-table tr.alerta {
+    background-color: #ff835d; /* Laranja claro */
+}
+
+.concursos-table tr:hover {
+    background-color: #ebf8ff !important;
+}
+
+@media (max-width: 768px) {
+    .header-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .concursos-table th, 
+    .concursos-table td {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+}
+</style>
+{{ end }}

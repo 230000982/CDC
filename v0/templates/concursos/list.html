@@ -1,0 +1,165 @@
+{{ define "content" }}
+<div class="concursos-container">
+    <div class="actions">
+        <a href="/create-concurso" class="button">Criar Concurso</a>
+    </div>
+    <a href="/concursos-ordenados">DCP</a>
+    <!-- Formulário de pesquisa -->
+    <form action="/concursos" method="get" class="search-form">
+        <label for="entidade">Pesquisar por Entidade:</label>
+        <input type="text" id="entidade" name="entidade" placeholder="Digite o nome da entidade">
+        <button type="submit">Buscar</button>
+        <a href="/concursos" style="margin-left: 10px;">Limpar pesquisa</a>
+    </form>
+    
+    <table class="concursos-table">
+        <thead>
+            <tr>
+                <th>Referência</th>
+                <th>Entidade</th>
+                <th>Esclarecimentos Erros</th>
+                <th>Hora</th>
+                <th>Proposta</th>
+                <th>Hora</th>
+                <th>Preço Base</th>
+                <th>Ref. BC</th>
+                <th>Tipo</th>
+                <th>Plataforma</th>
+                <th>Relatório Preliminar</th>
+                <th>Audiência Prévia</th>
+                <th>Hora</th>
+                <th>Relatório Final</th>
+                <th>Recurso</th>
+                <th>Impugnação</th>
+                <th>Estado</th>
+                <th>Editar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Concursos}}
+            <tr>
+                <td>{{.Referencia}}</td>
+                <td>{{.Entidade}}</td>
+                <td>{{if .DiaErro.Valid}}{{.DiaErro.String}}{{else}}{{end}}</td>
+                <td>{{if .HoraErro.Valid}}{{.HoraErro.String}}{{else}}{{end}}</td>
+                <td>{{if .DiaProposta.Valid}}{{.DiaProposta.String}}{{else}}{{end}}</td>
+                <td>{{if .HoraProposta.Valid}}{{.HoraProposta.String}}{{else}}{{end}}</td>
+                <td>{{.PrecoFormatted}}</td>
+                <td>{{.ReferenciaBC}}</td>
+                <td>{{.TipoDesc}}</td>
+                <td>{{.PlataformaDesc}}</td>
+                <td>{{if .Preliminar}}✅{{end}}</td>
+                <td>{{if .DiaAudiencia.Valid}}{{.DiaAudiencia.String}}{{else}}{{end}}</td>
+                <td>{{if .HoraAudiencia.Valid}}{{.HoraAudiencia.String}}{{else}}{{end}}</td>
+                <td>{{if .Final}}✅{{end}}</td>
+                <td>{{if .Recurso}}✅{{end}}</td>
+                <td>{{if .Impugnacao}}✅{{end}}</td>
+                <td>
+                    {{if eq .EstadoID 1}}
+                    {{else if eq .EstadoID 2}}Em Andamento
+                    {{else if eq .EstadoID 3}}Enviado
+                    {{else if eq .EstadoID 4}}Não Enviado
+                    {{else if eq .EstadoID 5}}Declaração
+                    {{else}}N/A{{end}}
+                </td>
+                <td>
+                    <a href="/edit-concurso/{{.ID}}" class="button">Editar</a>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>           
+    </table>
+</div>
+{{ end }}
+
+{{ define "styles" }}
+<style>
+.concursos-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.actions {
+    margin-bottom: 20px;
+}
+
+.search-form {
+    margin: 20px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-form label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.search-form input[type="text"] {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+}
+
+.concursos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    background-color: white;
+}
+
+.concursos-table th, 
+.concursos-table td {
+    padding: 12px 15px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+}
+
+.concursos-table th {
+    background-color: #3182ce;
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.concursos-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.concursos-table tr:hover {
+    background-color: #e9ecef;
+}
+
+@media (max-width: 1200px) {
+    .concursos-table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .search-form {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .search-form input[type="text"] {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .concursos-table th, 
+    .concursos-table td {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+}
+</style>
+{{ end }}

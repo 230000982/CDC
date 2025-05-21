@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }} - Controlo de Concursos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .nav-links {
+            margin: 15px 0;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .nav-links a {
+            margin-right: 15px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .nav-links a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        
+        .auth-container {
+            max-width: 500px;
+            width: 100%;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .toggle-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        
+        .toggle-btn {
+            width: auto;
+            padding: 10px 20px;
+            margin: 0;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .toggle-btn.active {
+            background-color: #3182ce;
+        }
+        
+        .toggle-btn:hover {
+            background-color: #5a6268;
+        }
+        
+        .toggle-btn.active:hover {
+            background-color: #1e568a;
+        }
+        
+        form {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #1e568a;
+        }
+        
+        @media (max-width: 768px) {
+            .auth-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ .Title }}</h1>
+    </div>
+    
+    <div class="nav-links">
+        <a href="/">Voltar</a>
+    </div>
+    
+    <div class="auth-container">
+        <div class="toggle-buttons">
+            <button class="toggle-btn active" onclick="showForm('login-form')">Login</button>
+            <button class="toggle-btn" onclick="showForm('register-form')">Registrar</button>
+        </div>
+        
+        <form id="login-form" action="/login" method="POST">
+            <label for="login-email">Email:</label>
+            <input type="email" id="login-email" name="email" required>
+            
+            <label for="login-password">Senha:</label>
+            <input type="password" id="login-password" name="password" required>
+            
+            <button type="submit">Login</button>
+        </form>
+        
+        <form id="register-form" action="/register" method="POST" style="display: none;">
+            <label for="register-email">Email:</label>
+            <input type="email" id="register-email" name="email" required>
+            
+            <label for="register-password">Senha:</label>
+            <input type="password" id="register-password" name="password" required>
+            
+            <label for="register-confirm-password">Confirmar Senha:</label>
+            <input type="password" id="register-confirm-password" name="confirm-password" required>
+            
+            <button type="submit">Registrar</button>
+        </form>
+    </div>
+    
+    <script>
+        function showForm(formId) {
+            // Hide all forms
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'none';
+            
+            // Show the selected form
+            document.getElementById(formId).style.display = 'block';
+            
+            // Update active button
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (formId === 'login-form') {
+                document.querySelector('.toggle-btn:nth-child(1)').classList.add('active');
+            } else {
+                document.querySelector('.toggle-btn:nth-child(2)').classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
