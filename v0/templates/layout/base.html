@@ -73,10 +73,44 @@
 
         .nav-links {
             margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .nav-links a {
             margin-right: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .role-admin {
+            background-color: #e53e3e;
+        }
+
+        .role-sav {
+            background-color: #3182ce;
+        }
+
+        .role-dcp {
+            background-color: #38a169;
+        }
+
+        .role-guest {
+            background-color: #718096;
         }
 
         /* Responsividade */
@@ -94,6 +128,16 @@
                 font-size: 1.5rem;
                 margin-bottom: 10px;
             }
+            
+            .nav-links {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .user-info {
+                margin-top: 10px;
+            }
         }
 
         /* Bloco adicional de estilos injetado dinamicamente */
@@ -104,14 +148,32 @@
 <body>
     <div class="header">
         <h1>{{ .Title }}</h1>
-
         <div class="user-info">
             {{ if .User }}
-                Olá, {{ .User.Nome }} | <a href="/logout">Sair</a>
+                <span>
+                    Olá, {{ .User.Nome }}
+                    {{ if eq .User.CargoID 1 }}
+                    <span class="role-badge role-admin">Admin</span>
+                    {{ else if eq .User.CargoID 2 }}
+                    <span class="role-badge role-sav">SAV</span>
+                    {{ else if eq .User.CargoID 3 }}
+                    <span class="role-badge role-dcp">DCP</span>
+                    {{ else }}
+                    <span class="role-badge role-guest">Guest</span>
+                    {{ end }}
+                </span>
+                <a href="/logout">Sair</a>
             {{ end }}
-
         </div>
     </div>
+    
+    <div class="nav-links">
+        <div>
+            <a href="/concursos">Lista de Concursos</a>
+            <a href="/concursos-ordenados">Concursos Futuros</a>
+        </div>
+    </div>
+    
     <div class="container">
         {{ block "content" . }}{{ end }}
     </div>

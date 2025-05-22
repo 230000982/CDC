@@ -1,11 +1,18 @@
 package middleware
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/sessions"
+)
+
+// Role constants
+const (
+	RoleAdmin = 1
+	RoleSAV   = 2
+	RoleDCP   = 3
+	RoleGuest = 4
 )
 
 // AuthMiddleware creates a middleware that checks if the user is authenticated
@@ -75,25 +82,52 @@ func RoleMiddleware(store *sessions.CookieStore, allowedRoles []int) func(http.H
 	}
 }
 
-// AuthMiddlewareFunc creates a middleware function that checks if the user is authenticated
-func AuthMiddlewareFunc(store *sessions.CookieStore, db *sql.DB) func(http.HandlerFunc) http.HandlerFunc {
-	return func(next http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			// Check authentication
-			session, err := store.Get(r, "session-name")
-			if err != nil {
-				http.Error(w, "Session error", http.StatusInternalServerError)
-				log.Printf("Session error: %v", err)
-				return
-			}
+// AdminSAVMiddleware creates a middleware that only allows Admin and SAV roles
+func AdminSAVMiddleware(store *sessions.CookieStore) func(http.Handler) http.Handler {
+	return RoleMiddleware(store, []int{RoleAdmin, RoleSAV})
+}
 
-			if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-				http.Redirect(w, r, "/login", http.StatusSeeOther)
-				return
-			}
+// ViewOnlyMiddleware creates a middleware that allows all roles (everyone can view)
+func ViewOnlyMiddleware(store *sessions.CookieStore) func(http.Handler) http.Handler {
+	return RoleMiddleware(store, []int{RoleAdmin, RoleSAV, RoleDCP, RoleGuest})
+}
 
-			// Call the next handler
-			next(w, r)
+// AdminOnlyMiddleware creates a middleware that only allows Admin role
+func AdminOnlyMiddleware(store *sessions.CookieStore) func(http.Handler) http.Handler {
+	return RoleMiddleware(store, []int{RoleAdmin})
+}
+
+// HasRole checks if the user has one of the specified roles
+func HasRole(r *http.Request, store *sessions.CookieStore, roles []int) bool {
+	session, err := store.Get(r, "session-name")
+	if err != nil {
+		return false
+	}
+
+	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+		return false
+	}
+
+	cargo, ok := session.Values["cargo"].(int)
+	if !ok {
+		return false
+	}
+
+	for _, role := range roles {
+		if cargo == role {
+			return true
 		}
 	}
+
+	return false
+}
+
+// IsAdminOrSAV checks if the user is an Admin or SAV
+func IsAdminOrSAV(r *http.Request, store *sessions.CookieStore) bool {
+	return HasRole(r, store, []int{RoleAdmin, RoleSAV})
+}
+
+// IsAdmin checks if the user is an Admin
+func IsAdmin(r *http.Request, store *sessions.CookieStore) bool {
+	return HasRole(r, store, []int{RoleAdmin})
 }

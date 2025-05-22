@@ -1,9 +1,10 @@
 {{ define "content" }}
 <div class="concursos-container">
+    {{if .CanEdit}}
     <div class="actions">
         <a href="/create-concurso" class="button">Criar Concurso</a>
     </div>
-    <a href="/concursos-ordenados">DCP</a>
+    {{end}}
     <!-- Formulário de pesquisa -->
     <form action="/concursos" method="get" class="search-form">
         <label for="entidade">Pesquisar por Entidade:</label>
@@ -32,7 +33,9 @@
                 <th>Recurso</th>
                 <th>Impugnação</th>
                 <th>Estado</th>
-                <th>Editar</th>
+                {{if .CanEdit}}
+                <th>Ações</th>
+                {{end}}
             </tr>
         </thead>
         <tbody>
@@ -62,9 +65,12 @@
                     {{else if eq .EstadoID 5}}Declaração
                     {{else}}N/A{{end}}
                 </td>
+                {{if $.CanEdit}}
                 <td>
                     <a href="/edit-concurso/{{.ID}}" class="button">Editar</a>
+                    <!-- <a href="/delete-concurso/{{.ID}}" class="button delete-button" onclick="return confirm('Tem certeza que deseja excluir este concurso?')">Excluir</a> -->
                 </td>
+                {{end}}
             </tr>
             {{end}}
         </tbody>           
@@ -137,6 +143,31 @@
     background-color: #e9ecef;
 }
 
+.button {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-right: 5px;
+    background-color: #3182ce;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.button:hover {
+    background-color: #1e568a;
+    text-decoration: none;
+    color: white;
+}
+
+.delete-button {
+    background-color: #e53e3e;
+}
+
+.delete-button:hover {
+    background-color: #c53030;
+}
+
 @media (max-width: 1200px) {
     .concursos-table {
         display: block;
@@ -159,6 +190,11 @@
     .concursos-table td {
         padding: 8px 10px;
         font-size: 0.9rem;
+    }
+    
+    .button {
+        padding: 4px 8px;
+        font-size: 0.8rem;
     }
 }
 </style>

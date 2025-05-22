@@ -38,7 +38,7 @@ func (h *PDFHandler) Download(w http.ResponseWriter, r *http.Request) {
                c.dia_audiencia, c.hora_audiencia,
                c.tipo_id, c.referencia
         FROM concurso c
-        WHERE c.estado_id = 1
+        WHERE c.estado_id = 2
         ORDER BY 
             COALESCE(c.dia_proposta, c.dia_erro, c.dia_audiencia) ASC,
             COALESCE(c.hora_proposta, c.hora_erro, c.hora_audiencia) ASC

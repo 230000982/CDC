@@ -15,6 +15,8 @@ import (
 	"v0/models"
 	"v0/services"
 
+	"v0/middleware"
+
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
@@ -75,7 +77,7 @@ func (h *ConcursoHandler) List(w http.ResponseWriter, r *http.Request) {
 		CargoID int
 	}{
 		ID:      userID,
-		Nome:    "User", // Default name
+		Nome:    "Usuário", // Default name
 		CargoID: cargoID,
 	}
 
@@ -88,16 +90,21 @@ func (h *ConcursoHandler) List(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Check if user can edit (Admin or SAV)
+	canEdit := cargoID == middleware.RoleAdmin || cargoID == middleware.RoleSAV
+
 	// Render template
 	tmpl := template.Must(template.ParseFiles("templates/layout/base.html", "templates/concursos/list.html"))
 	data := struct {
 		Title     string
 		User      interface{}
 		Concursos []ConcursoDisplay
+		CanEdit   bool
 	}{
 		Title:     "Lista de Concursos",
 		User:      user,
 		Concursos: concursosDisplay,
+		CanEdit:   canEdit,
 	}
 	tmpl.Execute(w, data)
 }
@@ -160,7 +167,7 @@ func (h *ConcursoHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		CargoID int
 	}{
 		ID:      userID,
-		Nome:    "User", // Default name
+		Nome:    "Usuário", // Default name
 		CargoID: cargoID,
 	}
 

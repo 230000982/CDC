@@ -15,6 +15,12 @@ type User struct {
 	CargoID  int
 }
 
+// Cargo represents a cargo (role) record
+type Cargo struct {
+	ID        int
+	Descricao string
+}
+
 // Authenticate checks if the provided credentials are valid
 func Authenticate(db *sql.DB, email, password string) (int, int, error) {
 	var id, cargo int
@@ -123,4 +129,28 @@ func GetAllUsers(db *sql.DB) ([]User, error) {
 	}
 
 	return users, nil
+}
+
+// GetAllCargos retrieves all cargos (roles)
+func GetAllCargos(db *sql.DB) ([]Cargo, error) {
+	rows, err := db.Query("SELECT id_cargo, descricao FROM cargo")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var cargos []Cargo
+	for rows.Next() {
+		var cargo Cargo
+		if err := rows.Scan(&cargo.ID, &cargo.Descricao); err != nil {
+			return nil, err
+		}
+		cargos = append(cargos, cargo)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return cargos, nil
 }

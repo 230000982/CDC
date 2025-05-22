@@ -6,9 +6,6 @@
         <a href="/download-pdf" class="button">Download PDF</a>
         <div class="header-info">
             <div>Atualizado em: {{.CurrentTime}}</div>
-            <div>            
-                <a href="/concursos">SAV</a>
-            </div>
         </div>
     </div>
     
@@ -83,6 +80,23 @@
     margin-right: 10px;
 }
 
+.button {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-right: 5px;
+    background-color: #3182ce;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.button:hover {
+    background-color: #1e568a;
+    text-decoration: none;
+    color: white;
+}
+
 .concursos-table {
     width: 100%;
     border-collapse: collapse;
@@ -114,11 +128,11 @@
 }
 
 .concursos-table tr.urgente {
-    background-color: #ff5656; /* Vermelho claro */
+    background-color: #ff7b7b; /* Vermelho claro */
 }
 
 .concursos-table tr.alerta {
-    background-color: #ff835d; /* Laranja claro */
+    background-color: #ffb199; /* Laranja claro */
 }
 
 .concursos-table tr:hover {
