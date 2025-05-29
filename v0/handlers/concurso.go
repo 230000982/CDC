@@ -12,10 +12,9 @@ import (
 
 	"v0/config"
 	"v0/database"
+	"v0/middleware"
 	"v0/models"
 	"v0/services"
-
-	"v0/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -77,7 +76,7 @@ func (h *ConcursoHandler) List(w http.ResponseWriter, r *http.Request) {
 		CargoID int
 	}{
 		ID:      userID,
-		Nome:    "Usuário", // Default name
+		Nome:    "User", // Default name
 		CargoID: cargoID,
 	}
 
@@ -149,11 +148,19 @@ func (h *ConcursoHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resultado, err := database.GetAdjudicatarios(h.db)
+	resultados, err := database.GetResultados(h.db)
 	if err != nil {
-		log.Printf("Error fetching adjudicatarios: %v", err)
-		http.Error(w, "Erro ao buscar adjudicatários", http.StatusInternalServerError)
+		log.Printf("Error fetching resultados: %v", err)
+		http.Error(w, "Erro ao buscar resultados", http.StatusInternalServerError)
 		return
+	}
+
+	// Get all emails for autocomplete
+	emails, err := database.GetAllEmails(h.db)
+	if err != nil {
+		log.Printf("Error fetching emails: %v", err)
+		// Continue without emails for autocomplete
+		emails = []string{}
 	}
 
 	// Get user info from session
@@ -167,7 +174,7 @@ func (h *ConcursoHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		CargoID int
 	}{
 		ID:      userID,
-		Nome:    "Usuário", // Default name
+		Nome:    "User", // Default name
 		CargoID: cargoID,
 	}
 
@@ -197,10 +204,11 @@ func (h *ConcursoHandler) Edit(w http.ResponseWriter, r *http.Request) {
 			ID        int
 			Descricao string
 		}
-		Resultado []struct {
+		Resultados []struct {
 			ID        int
 			Descricao string
 		}
+		Emails []string
 	}{
 		Title:       "Editar Concurso",
 		User:        user,
@@ -208,7 +216,8 @@ func (h *ConcursoHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		Tipos:       tipos,
 		Plataformas: plataformas,
 		Estados:     estados,
-		Resultado:   resultado,
+		Resultados:  resultados,
+		Emails:      emails,
 	}
 
 	// Render template
@@ -271,6 +280,11 @@ func (h *ConcursoHandler) Update(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		resultadoID, err := strconv.Atoi(r.FormValue("resultado_id"))
+		if err != nil {
+			resultadoID = 1 // Default to empty if invalid
+		}
+
 		// Create concurso object
 		concurso := &models.Concurso{
 			ID:            oldConcurso.ID,
@@ -291,6 +305,9 @@ func (h *ConcursoHandler) Update(w http.ResponseWriter, r *http.Request) {
 			TipoID:        tipoID,
 			PlataformaID:  plataformaID,
 			EstadoID:      estadoID,
+			Link:          r.FormValue("link"),
+			Adjudicatario: r.FormValue("adjudicatario"),
+			ResultadoID:   resultadoID,
 		}
 
 		// Update concurso in database
@@ -325,7 +342,17 @@ func (h *ConcursoHandler) Update(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		// Send update email
+		// Get resultado description for email
+		var resultadoDesc string
+		rows, err = h.db.Query("SELECT descricao FROM resultado WHERE id_resultado = ?", resultadoID)
+		if err == nil {
+			defer rows.Close()
+			if rows.Next() {
+				rows.Scan(&resultadoDesc)
+			}
+		}
+
+		// Send update email to DCP and SAV
 		emailService := services.NewEmailService(h.cfg.Email)
 		err = emailService.SendUpdateEmail(
 			concurso.Referencia,
@@ -342,10 +369,39 @@ func (h *ConcursoHandler) Update(w http.ResponseWriter, r *http.Request) {
 			concurso.Final,
 			concurso.Recurso,
 			concurso.Impugnacao,
+			resultadoDesc,
+			concurso.Link,
 			h.db,
 		)
 		if err != nil {
-			log.Printf("Error sending email: %v", err)
+			log.Printf("Error sending email to DCP and SAV: %v", err)
+		}
+
+		// Check if adjudicatario was added or changed
+		if concurso.Adjudicatario != "" && concurso.Adjudicatario != oldConcurso.Adjudicatario {
+			// Send email to adjudicatario
+			err = emailService.SendAdjudicatarioEmail(
+				concurso.Adjudicatario,
+				concurso.Referencia,
+				concurso.Entidade,
+				tipoDesc,
+				estadoDesc,
+				concurso.DiaErro.NullString.String,
+				concurso.HoraErro.NullString.String,
+				concurso.DiaProposta.NullString.String,
+				concurso.HoraProposta.NullString.String,
+				concurso.DiaAudiencia.NullString.String,
+				concurso.HoraAudiencia.NullString.String,
+				concurso.Preliminar,
+				concurso.Final,
+				concurso.Recurso,
+				concurso.Impugnacao,
+				resultadoDesc,
+				concurso.Link,
+			)
+			if err != nil {
+				log.Printf("Error sending email to adjudicatario: %v", err)
+			}
 		}
 
 		// Redirect to concursos list
@@ -377,11 +433,19 @@ func (h *ConcursoHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resultado, err := database.GetAdjudicatarios(h.db)
+	resultados, err := database.GetResultados(h.db)
 	if err != nil {
-		log.Printf("Error fetching adjudicatarios: %v", err)
-		http.Error(w, "Erro ao buscar adjudicatários", http.StatusInternalServerError)
+		log.Printf("Error fetching resultados: %v", err)
+		http.Error(w, "Erro ao buscar resultados", http.StatusInternalServerError)
 		return
+	}
+
+	// Get all emails for autocomplete
+	emails, err := database.GetAllEmails(h.db)
+	if err != nil {
+		log.Printf("Error fetching emails: %v", err)
+		// Continue without emails for autocomplete
+		emails = []string{}
 	}
 
 	// Get user info from session
@@ -395,7 +459,7 @@ func (h *ConcursoHandler) Create(w http.ResponseWriter, r *http.Request) {
 		CargoID int
 	}{
 		ID:      userID,
-		Nome:    "Usuário", // Default name
+		Nome:    "User", // Default name
 		CargoID: cargoID,
 	}
 
@@ -424,17 +488,19 @@ func (h *ConcursoHandler) Create(w http.ResponseWriter, r *http.Request) {
 			ID        int
 			Descricao string
 		}
-		Resultado []struct {
+		Resultados []struct {
 			ID        int
 			Descricao string
 		}
+		Emails []string
 	}{
 		Title:       "Criar Concurso",
 		User:        user,
 		Tipos:       tipos,
 		Plataformas: plataformas,
 		Estados:     estados,
-		Resultado:   resultado,
+		Resultados:  resultados,
+		Emails:      emails,
 	}
 
 	// Render template
@@ -461,6 +527,7 @@ func (h *ConcursoHandler) Save(w http.ResponseWriter, r *http.Request) {
 		tipoIDStr := r.FormValue("tipo_id")
 		plataformaIDStr := r.FormValue("plataforma_id")
 		estadoIDStr := r.FormValue("estado_id")
+		resultadoIDStr := r.FormValue("resultado_id")
 
 		// Convert strings to their respective types with default values
 		var preco float64
@@ -500,6 +567,16 @@ func (h *ConcursoHandler) Save(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		var resultadoID int
+		if resultadoIDStr != "" {
+			resultadoID, err = strconv.Atoi(resultadoIDStr)
+			if err != nil {
+				resultadoID = 1 // Default to empty if invalid
+			}
+		} else {
+			resultadoID = 1 // Default to empty if not provided
+		}
+
 		// Create concurso object
 		concurso := &models.Concurso{
 			Preco:         preco,
@@ -519,6 +596,9 @@ func (h *ConcursoHandler) Save(w http.ResponseWriter, r *http.Request) {
 			TipoID:        tipoID,
 			PlataformaID:  plataformaID,
 			EstadoID:      estadoID,
+			Link:          r.FormValue("link"),
+			Adjudicatario: r.FormValue("adjudicatario"),
+			ResultadoID:   resultadoID,
 		}
 
 		// Create concurso in database
@@ -553,7 +633,17 @@ func (h *ConcursoHandler) Save(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		// Send update email
+		// Get resultado description for email
+		var resultadoDesc string
+		rows, err = h.db.Query("SELECT descricao FROM resultado WHERE id_resultado = ?", resultadoID)
+		if err == nil {
+			defer rows.Close()
+			if rows.Next() {
+				rows.Scan(&resultadoDesc)
+			}
+		}
+
+		// Send update email to DCP and SAV
 		emailService := services.NewEmailService(h.cfg.Email)
 		err = emailService.SendUpdateEmail(
 			concurso.Referencia,
@@ -570,10 +660,39 @@ func (h *ConcursoHandler) Save(w http.ResponseWriter, r *http.Request) {
 			concurso.Final,
 			concurso.Recurso,
 			concurso.Impugnacao,
+			resultadoDesc,
+			concurso.Link,
 			h.db,
 		)
 		if err != nil {
-			log.Printf("Error sending email: %v", err)
+			log.Printf("Error sending email to DCP and SAV: %v", err)
+		}
+
+		// Check if adjudicatario was added
+		if concurso.Adjudicatario != "" {
+			// Send email to adjudicatario
+			err = emailService.SendAdjudicatarioEmail(
+				concurso.Adjudicatario,
+				concurso.Referencia,
+				concurso.Entidade,
+				tipoDesc,
+				estadoDesc,
+				concurso.DiaErro.NullString.String,
+				concurso.HoraErro.NullString.String,
+				concurso.DiaProposta.NullString.String,
+				concurso.HoraProposta.NullString.String,
+				concurso.DiaAudiencia.NullString.String,
+				concurso.HoraAudiencia.NullString.String,
+				concurso.Preliminar,
+				concurso.Final,
+				concurso.Recurso,
+				concurso.Impugnacao,
+				resultadoDesc,
+				concurso.Link,
+			)
+			if err != nil {
+				log.Printf("Error sending email to adjudicatario: %v", err)
+			}
 		}
 
 		// Redirect to concursos list
@@ -653,7 +772,7 @@ func (h *ConcursoHandler) ListOrdered(w http.ResponseWriter, r *http.Request) {
 		CargoID int
 	}{
 		ID:      userID,
-		Nome:    "Usuário", // Default name
+		Nome:    "User", // Default name
 		CargoID: cargoID,
 	}
 

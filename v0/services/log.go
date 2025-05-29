@@ -99,11 +99,11 @@ func (s *LogService) GetLogs(table string, action string, userID int, limit int,
 
 	// Add ordering and pagination
 	query += " ORDER BY timestamp DESC"
-
+	
 	if limit > 0 {
 		query += " LIMIT ?"
 		args = append(args, limit)
-
+		
 		if offset > 0 {
 			query += " OFFSET ?"
 			args = append(args, offset)

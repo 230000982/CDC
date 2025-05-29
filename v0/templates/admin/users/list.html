@@ -1,0 +1,118 @@
+{{ define "content" }}
+<div class="users-container">
+    <div class="actions">
+        <a href="/admin/users/create" class="button">Criar User</a>
+    </div>
+    
+    <table class="users-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Cargo</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Users}}
+            <tr>
+                <td>{{.Nome}}</td>
+                <td>{{.Email}}</td>
+                <td>{{.CargoDesc}}</td>
+                <td>
+                    <a href="/admin/users/edit/{{.ID}}" class="button">Editar</a>
+                    <a href="/admin/users/reset/{{.ID}}" class="button">Reset Attempts</a>
+                    <!-- <a href="/admin/users/delete/{{.ID}}" class="button delete-button" onclick="return confirm('Tem certeza que deseja excluir este usuário?')">Excluir</a> -->
+                </td>
+            </tr>
+            {{else}}
+            <tr>
+                <td colspan="5" style="text-align: center;">Nenhum user encontrado</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+{{ end }}
+
+{{ define "styles" }}
+<style>
+.users-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.actions {
+    margin-bottom: 20px;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    background-color: white;
+}
+
+.users-table th, 
+.users-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+}
+
+.users-table th {
+    background-color: #3182ce;
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.users-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.users-table tr:hover {
+    background-color: #e9ecef;
+}
+
+.button {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-right: 5px;
+    background-color: #3182ce;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.button:hover {
+    background-color: #1e568a;
+    text-decoration: none;
+    color: white;
+}
+
+.delete-button {
+    background-color: #e53e3e;
+}
+
+.delete-button:hover {
+    background-color: #c53030;
+}
+
+@media (max-width: 768px) {
+    .users-table th, 
+    .users-table td {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+    
+    .button {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
+}
+</style>
+{{ end }}

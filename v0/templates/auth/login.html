@@ -151,55 +151,17 @@
     </div>
     
     <div class="auth-container">
-        <div class="toggle-buttons">
-            <button class="toggle-btn active" onclick="showForm('login-form')">Login</button>
-            <button class="toggle-btn" onclick="showForm('register-form')">Registrar</button>
-        </div>
         
         <form id="login-form" action="/login" method="POST">
-            <label for="login-email">Email:</label>
-            <input type="email" id="login-email" name="email" required>
+            <label for="login-email">User:</label>
+            <input type="" id="login-email" name="email" required>
             
-            <label for="login-password">Senha:</label>
+            <label for="login-password">Password:</label>
             <input type="password" id="login-password" name="password" required>
             
             <button type="submit">Login</button>
         </form>
         
-        <form id="register-form" action="/register" method="POST" style="display: none;">
-            <label for="register-email">Email:</label>
-            <input type="email" id="register-email" name="email" required>
-            
-            <label for="register-password">Senha:</label>
-            <input type="password" id="register-password" name="password" required>
-            
-            <label for="register-confirm-password">Confirmar Senha:</label>
-            <input type="password" id="register-confirm-password" name="confirm-password" required>
-            
-            <button type="submit">Registrar</button>
-        </form>
     </div>
-    
-    <script>
-        function showForm(formId) {
-            // Hide all forms
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('register-form').style.display = 'none';
-            
-            // Show the selected form
-            document.getElementById(formId).style.display = 'block';
-            
-            // Update active button
-            document.querySelectorAll('.toggle-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            if (formId === 'login-form') {
-                document.querySelector('.toggle-btn:nth-child(1)').classList.add('active');
-            } else {
-                document.querySelector('.toggle-btn:nth-child(2)').classList.add('active');
-            }
-        }
-    </script>
 </body>
 </html>

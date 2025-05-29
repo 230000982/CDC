@@ -36,7 +36,7 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	users, err := models.GetAllUsers(h.db)
 	if err != nil {
 		log.Printf("Error fetching users: %v", err)
-		http.Error(w, "Erro ao buscar usuários", http.StatusInternalServerError)
+		http.Error(w, "Erro ao buscar user", http.StatusInternalServerError)
 		return
 	}
 
@@ -84,7 +84,7 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 		CargoID int
 	}{
 		ID:      userID,
-		Nome:    "Usuário", // Default name
+		Nome:    "User", // Default name
 		CargoID: cargoID,
 	}
 
@@ -104,7 +104,7 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 		User  interface{}
 		Users []UserDisplay
 	}{
-		Title: "Gerenciar Usuários",
+		Title: "Gerenciar Users",
 		User:  user,
 		Users: usersDisplay,
 	}
@@ -132,7 +132,7 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		CargoID int
 	}{
 		ID:      userID,
-		Nome:    "Usuário", // Default name
+		Nome:    "User", // Default name
 		CargoID: cargoID,
 	}
 
@@ -152,7 +152,7 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		User   interface{}
 		Cargos []models.Cargo
 	}{
-		Title:  "Criar Usuário",
+		Title:  "Criar User",
 		User:   user,
 		Cargos: cargos,
 	}
@@ -181,7 +181,7 @@ func (h *UserHandler) Save(w http.ResponseWriter, r *http.Request) {
 
 		// Basic validations
 		if password != confirmPassword {
-			http.Error(w, "As senhas não coincidem", http.StatusBadRequest)
+			http.Error(w, "A password não coincide", http.StatusBadRequest)
 			return
 		}
 
@@ -207,7 +207,7 @@ func (h *UserHandler) Save(w http.ResponseWriter, r *http.Request) {
 		// Create user
 		if err := models.CreateUser(h.db, nome, email, password, cargoID); err != nil {
 			log.Printf("User creation error: %v", err)
-			http.Error(w, "Erro ao criar usuário", http.StatusInternalServerError)
+			http.Error(w, "Erro ao criar user", http.StatusInternalServerError)
 			return
 		}
 
@@ -235,14 +235,14 @@ func (h *UserHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if id == "" {
-		http.Error(w, "ID do usuário inválido", http.StatusBadRequest)
+		http.Error(w, "ID do user inválido", http.StatusBadRequest)
 		return
 	}
 
 	// Convert ID to int
 	userID, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, "ID do usuário inválido", http.StatusBadRequest)
+		http.Error(w, "ID do user inválido", http.StatusBadRequest)
 		return
 	}
 
@@ -250,7 +250,7 @@ func (h *UserHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	user, err := models.GetUserByID(h.db, userID)
 	if err != nil {
 		log.Printf("Error fetching user: %v", err)
-		http.Error(w, "Erro ao buscar usuário", http.StatusInternalServerError)
+		http.Error(w, "Erro ao buscar user", http.StatusInternalServerError)
 		return
 	}
 
@@ -273,7 +273,7 @@ func (h *UserHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		CargoID int
 	}{
 		ID:      adminID,
-		Nome:    "Usuário", // Default name
+		Nome:    "User", // Default name
 		CargoID: adminCargoID,
 	}
 
@@ -294,7 +294,7 @@ func (h *UserHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		Target *models.User // This is the user being edited
 		Cargos []models.Cargo
 	}{
-		Title:  "Editar Usuário",
+		Title:  "Editar User",
 		User:   admin,
 		Target: user,
 		Cargos: cargos,
@@ -308,14 +308,14 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if id == "" {
-		http.Error(w, "ID do usuário inválido", http.StatusBadRequest)
+		http.Error(w, "ID do user inválido", http.StatusBadRequest)
 		return
 	}
 
 	// Convert ID to int
 	userID, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, "ID do usuário inválido", http.StatusBadRequest)
+		http.Error(w, "ID do user inválido", http.StatusBadRequest)
 		return
 	}
 
@@ -327,7 +327,7 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 	oldUser, err := models.GetUserByID(h.db, userID)
 	if err != nil {
 		log.Printf("Error fetching original user: %v", err)
-		http.Error(w, "Erro ao buscar usuário original", http.StatusInternalServerError)
+		http.Error(w, "Erro ao pesquisar user original", http.StatusInternalServerError)
 		return
 	}
 
@@ -377,7 +377,7 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		// Update user in database
 		if err := models.UpdateUser(h.db, updatedUser); err != nil {
 			log.Printf("User update error: %v", err)
-			http.Error(w, "Erro ao atualizar usuário", http.StatusInternalServerError)
+			http.Error(w, "Erro ao atualizar user", http.StatusInternalServerError)
 			return
 		}
 
@@ -387,13 +387,13 @@ func (h *UserHandler) Update(w http.ResponseWriter, r *http.Request) {
 		// Update password if provided
 		if password != "" && confirmPassword != "" {
 			if password != confirmPassword {
-				http.Error(w, "As senhas não coincidem", http.StatusBadRequest)
+				http.Error(w, "A password não coincide", http.StatusBadRequest)
 				return
 			}
 
 			if err := models.UpdatePassword(h.db, userID, password); err != nil {
 				log.Printf("Password update error: %v", err)
-				http.Error(w, "Erro ao atualizar senha", http.StatusInternalServerError)
+				http.Error(w, "Erro ao atualizar password", http.StatusInternalServerError)
 				return
 			}
 
@@ -414,14 +414,14 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if id == "" {
-		http.Error(w, "ID do usuário inválido", http.StatusBadRequest)
+		http.Error(w, "ID do user inválido", http.StatusBadRequest)
 		return
 	}
 
 	// Convert ID to int
 	userID, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, "ID do usuário inválido", http.StatusBadRequest)
+		http.Error(w, "ID do user inválido", http.StatusBadRequest)
 		return
 	}
 
@@ -431,7 +431,7 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	// Prevent self-deletion
 	if userID == adminID {
-		http.Error(w, "Não é possível excluir o próprio usuário", http.StatusBadRequest)
+		http.Error(w, "Não é possível excluir o próprio user", http.StatusBadRequest)
 		return
 	}
 
@@ -439,14 +439,14 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	oldUser, err := models.GetUserByID(h.db, userID)
 	if err != nil {
 		log.Printf("Error fetching user for deletion: %v", err)
-		http.Error(w, "Erro ao buscar usuário", http.StatusInternalServerError)
+		http.Error(w, "Erro ao buscar user", http.StatusInternalServerError)
 		return
 	}
 
 	// Delete user
 	if err := models.DeleteUser(h.db, userID); err != nil {
 		log.Printf("User deletion error: %v", err)
-		http.Error(w, "Erro ao excluir usuário", http.StatusInternalServerError)
+		http.Error(w, "Erro ao excluir user", http.StatusInternalServerError)
 		return
 	}
 
@@ -454,5 +454,40 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	h.logService.LogDelete(adminID, "user", oldUser)
 
 	// Redirect to users list
+	http.Redirect(w, r, "/admin/users", http.StatusSeeOther)
+}
+
+func (h *UserHandler) Reset(w http.ResponseWriter, r *http.Request) {
+	// Obtém o ID do user da URL
+	vars := mux.Vars(r)
+	id := vars["id"]
+	if id == "" {
+		http.Error(w, "ID do user inválido", http.StatusBadRequest)
+		return
+	}
+
+	// Converte ID para int
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "ID do user inválido", http.StatusBadRequest)
+		return
+	}
+
+	// Verifica se o usuário existe antes de resetar
+	_, err = models.GetUserByID(h.db, userID)
+	if err != nil {
+		log.Printf("Erro ao buscar user para reset: %v", err)
+		http.Error(w, "User não encontrado", http.StatusNotFound)
+		return
+	}
+
+	// Reset do contador de tentativas falhadas
+	if err := models.ResetFailedAttempts(h.db, userID); err != nil {
+		log.Printf("Erro ao resetar tentativas falhadas: %v", err)
+		http.Error(w, "Erro ao resetar tentativas", http.StatusInternalServerError)
+		return
+	}
+
+	// Redireciona de volta à lista de users ou retorna sucesso
 	http.Redirect(w, r, "/admin/users", http.StatusSeeOther)
 }

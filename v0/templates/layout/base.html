@@ -148,6 +148,7 @@
 <body>
     <div class="header">
         <h1>{{ .Title }}</h1>
+
         <div class="user-info">
             {{ if .User }}
                 <span>
@@ -171,6 +172,19 @@
         <div>
             <a href="/concursos">Lista de Concursos</a>
             <a href="/concursos-ordenados">Concursos Futuros</a>
+            {{ if .User }}
+                {{ if eq .User.CargoID 1 }}
+                <a href="/admin/users">Gerenciar Users</a>
+                {{ end }}
+            {{ end }}
+        </div>
+        
+        <div>
+            {{ if .User }}
+                {{ if or (eq .User.CargoID 1) (eq .User.CargoID 2) }}
+                <a href="/create-concurso" class="button">Criar Concurso</a>
+                {{ end }}
+            {{ end }}
         </div>
     </div>
     

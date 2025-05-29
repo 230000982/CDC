@@ -27,6 +27,10 @@ type Concurso struct {
 	EstadoID       int
 	TipoDesc       string
 	PlataformaDesc string
+	Link           string        // New field
+	Adjudicatario  string        // New field
+	ResultadoID    int           // New field
+	ResultadoDesc  string        // New field for display
 }
 
 // ConcursoItem represents a concurso item for the ordered view
@@ -38,6 +42,9 @@ type ConcursoItem struct {
 	Hora          string
 	Tipo          string
 	DiasRestantes int
+	Link          string        // New field
+	Adjudicatario string        // New field
+	ResultadoID   int           // New field
 }
 
 // GetConcursoByID retrieves a concurso by ID
@@ -48,7 +55,7 @@ func GetConcursoByID(db *sql.DB, id string) (*Concurso, error) {
         SELECT c.id_concurso, c.preco, c.referencia, c.entidade, c.dia_erro, c.hora_erro, 
                c.dia_proposta, c.hora_proposta, c.referencia_bc, c.preliminar, 
                c.dia_audiencia, c.hora_audiencia, c.final, c.recurso, c.impugnacao, 
-               c.tipo_id, c.plataforma_id, c.estado_id
+               c.tipo_id, c.plataforma_id, c.estado_id, c.link, c.adjudicatario, c.resultado_id
         FROM concurso c
         WHERE c.id_concurso = ?
     `, id).Scan(
@@ -59,6 +66,7 @@ func GetConcursoByID(db *sql.DB, id string) (*Concurso, error) {
 		&concurso.DiaAudiencia.NullString, &concurso.HoraAudiencia.NullString,
 		&concurso.Final, &concurso.Recurso, &concurso.Impugnacao,
 		&concurso.TipoID, &concurso.PlataformaID, &concurso.EstadoID,
+		&concurso.Link, &concurso.Adjudicatario, &concurso.ResultadoID,
 	)
 
 	if err != nil {
@@ -74,10 +82,12 @@ func GetConcursos(db *sql.DB, entidade string) ([]Concurso, error) {
 	query := `
         SELECT c.id_concurso, c.preco, c.referencia, c.entidade, c.dia_erro, c.hora_erro, c.dia_proposta, c.hora_proposta, 
                c.referencia_bc, c.preliminar, c.dia_audiencia, c.hora_audiencia, c.final, c.recurso, c.impugnacao, 
-               t.descricao AS tipo, p.descricao AS plataforma, c.estado_id AS estado, c.tipo_id, c.plataforma_id
+               t.descricao AS tipo, p.descricao AS plataforma, c.estado_id AS estado, c.tipo_id, c.plataforma_id,
+               c.link, c.adjudicatario, c.resultado_id, r.descricao AS resultado
         FROM concurso c
         JOIN tipo t ON c.tipo_id = t.id_tipo
         JOIN plataforma p ON c.plataforma_id = p.id_platforma
+        LEFT JOIN resultado r ON c.resultado_id = r.id_resultado
     `
 
 	// Add filter if there's a search by entidade
@@ -112,6 +122,7 @@ func GetConcursos(db *sql.DB, entidade string) ([]Concurso, error) {
 			&c.DiaAudiencia.NullString, &c.HoraAudiencia.NullString,
 			&c.Final, &c.Recurso, &c.Impugnacao,
 			&c.TipoDesc, &c.PlataformaDesc, &c.EstadoID, &c.TipoID, &c.PlataformaID,
+			&c.Link, &c.Adjudicatario, &c.ResultadoID, &c.ResultadoDesc,
 		)
 		if err != nil {
 			return nil, err
@@ -141,7 +152,7 @@ func GetFutureConcursos(db *sql.DB) ([]ConcursoItem, error) {
                c.dia_erro, c.hora_erro, 
                c.dia_proposta, c.hora_proposta,
                c.dia_audiencia, c.hora_audiencia,
-               c.tipo_id, c.referencia
+               c.tipo_id, c.referencia, c.link, c.adjudicatario, c.resultado_id
         FROM concurso c
         WHERE c.estado_id = 2
         ORDER BY 
@@ -181,7 +192,8 @@ func GetFutureConcursos(db *sql.DB) ([]ConcursoItem, error) {
 	// Scan rows
 	for rows.Next() {
 		var id, estado, objeto int
-		var entidade, referencia string
+		var entidade, referencia, link, adjudicatario string
+		var resultadoID int
 		var diaErro, horaErro sql.NullString
 		var diaProposta, horaProposta sql.NullString
 		var diaAudiencia, horaAudiencia sql.NullString
@@ -191,7 +203,7 @@ func GetFutureConcursos(db *sql.DB) ([]ConcursoItem, error) {
 			&diaErro, &horaErro,
 			&diaProposta, &horaProposta,
 			&diaAudiencia, &horaAudiencia,
-			&objeto, &referencia,
+			&objeto, &referencia, &link, &adjudicatario, &resultadoID,
 		)
 		if err != nil {
 			return nil, err
@@ -208,6 +220,9 @@ func GetFutureConcursos(db *sql.DB) ([]ConcursoItem, error) {
 				Hora:          horaProposta.String,
 				Tipo:          "Proposta",
 				DiasRestantes: dias,
+				Link:          link,
+				Adjudicatario: adjudicatario,
+				ResultadoID:   resultadoID,
 			})
 		}
 
@@ -221,6 +236,9 @@ func GetFutureConcursos(db *sql.DB) ([]ConcursoItem, error) {
 				Hora:          horaErro.String,
 				Tipo:          "Erro",
 				DiasRestantes: dias,
+				Link:          link,
+				Adjudicatario: adjudicatario,
+				ResultadoID:   resultadoID,
 			})
 		}
 
@@ -234,6 +252,9 @@ func GetFutureConcursos(db *sql.DB) ([]ConcursoItem, error) {
 				Hora:          horaAudiencia.String,
 				Tipo:          "Audiencia",
 				DiasRestantes: dias,
+				Link:          link,
+				Adjudicatario: adjudicatario,
+				ResultadoID:   resultadoID,
 			})
 		}
 	}
@@ -252,14 +273,16 @@ func CreateConcurso(db *sql.DB, c *Concurso) error {
             referencia, entidade, dia_erro, hora_erro, 
             dia_proposta, hora_proposta, preco, tipo_id, 
             plataforma_id, referencia_bc, preliminar, dia_audiencia, 
-            hora_audiencia, final, recurso, impugnacao, estado_id
+            hora_audiencia, final, recurso, impugnacao, estado_id,
+            link, adjudicatario, resultado_id
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
 		c.Referencia, c.Entidade, c.DiaErro.NullString, c.HoraErro.NullString,
 		c.DiaProposta.NullString, c.HoraProposta.NullString, c.Preco, c.TipoID,
 		c.PlataformaID, c.ReferenciaBC, c.Preliminar, c.DiaAudiencia.NullString,
-		c.HoraAudiencia.NullString, c.Final, c.Recurso, c.Impugnacao, c.EstadoID)
+		c.HoraAudiencia.NullString, c.Final, c.Recurso, c.Impugnacao, c.EstadoID,
+		c.Link, c.Adjudicatario, c.ResultadoID)
 
 	return err
 }
@@ -271,7 +294,8 @@ func UpdateConcurso(db *sql.DB, id string, c *Concurso) error {
         SET preco = ?, referencia = ?, entidade = ?, referencia_bc = ?,
             dia_erro = ?, hora_erro = ?, dia_proposta = ?, hora_proposta = ?,
             dia_audiencia = ?, hora_audiencia = ?, preliminar = ?, final = ?,
-            recurso = ?, impugnacao = ?, tipo_id = ?, plataforma_id = ?, estado_id = ?
+            recurso = ?, impugnacao = ?, tipo_id = ?, plataforma_id = ?, estado_id = ?,
+            link = ?, adjudicatario = ?, resultado_id = ?
         WHERE id_concurso = ?
     `,
 		c.Preco, c.Referencia, c.Entidade, c.ReferenciaBC,
@@ -279,7 +303,8 @@ func UpdateConcurso(db *sql.DB, id string, c *Concurso) error {
 		c.DiaProposta.NullString, c.HoraProposta.NullString,
 		c.DiaAudiencia.NullString, c.HoraAudiencia.NullString,
 		c.Preliminar, c.Final, c.Recurso, c.Impugnacao,
-		c.TipoID, c.PlataformaID, c.EstadoID, id)
+		c.TipoID, c.PlataformaID, c.EstadoID,
+		c.Link, c.Adjudicatario, c.ResultadoID, id)
 
 	return err
 }
@@ -288,4 +313,28 @@ func UpdateConcurso(db *sql.DB, id string, c *Concurso) error {
 func DeleteConcurso(db *sql.DB, id string) error {
 	_, err := db.Exec("DELETE FROM concurso WHERE id_concurso = ?", id)
 	return err
+}
+
+// GetAllEmails retrieves all emails from the user table
+func GetAllEmails(db *sql.DB) ([]string, error) {
+	rows, err := db.Query("SELECT email FROM user")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var emails []string
+	for rows.Next() {
+		var email string
+		if err := rows.Scan(&email); err != nil {
+			return nil, err
+		}
+		emails = append(emails, email)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return emails, nil
 }

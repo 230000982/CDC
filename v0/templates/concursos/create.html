@@ -1,10 +1,9 @@
 {{ define "content" }}
 <div class="concurso-form-container">
-    <h2>Criar Concurso</h2>
     
     <form action="/save-concurso" method="POST" class="concurso-form">
         <div class="form-section">
-            <h3>Informações Básicas</h3>
+            <h2>Informações Básicas</h2>
             
             <div class="form-group">
                 <label for="referencia">Referência:</label>
@@ -27,9 +26,14 @@
             </div>
             
             <div class="form-group">
+                <label for="link">Link:</label>
+                <input type="url" id="link" name="link" placeholder="https://...">
+            </div>
+            
+            <div class="form-group">
                 <label for="tipo_id">Tipo:</label>
                 <select id="tipo_id" name="tipo_id" required>
-                    <option value="1"></option>
+                    <option value="6"></option>
                     {{range .Tipos}}
                     <option value="{{.ID}}">{{.Descricao}}</option>
                     {{end}}
@@ -39,7 +43,7 @@
             <div class="form-group">
                 <label for="plataforma_id">Plataforma:</label>
                 <select id="plataforma_id" name="plataforma_id" required>
-                    <option value="1"></option>
+                    <option value="6"></option>
                     {{range .Plataformas}}
                     <option value="{{.ID}}">{{.Descricao}}</option>
                     {{end}}
@@ -80,7 +84,7 @@
         </div>
         
         <div class="form-section">
-            <h3>Relatório</h3>
+            <h2>Relatório</h2>
             
             <div class="checkbox-group">
                 <label for="preliminar">
@@ -134,13 +138,22 @@
             </div>
             
             <div class="form-group">
-                <label for="adjudicatario_id">Adjudicatário:</label>
-                <select id="adjudicatario_id" name="adjudicatario_id">
-                    <option value="1"></option>
-                    {{range .Resultado}}
+                <label for="resultado_id">Resultado:</label>
+                <select id="resultado_id" name="resultado_id">
+                    {{range .Resultados}}
                     <option value="{{.ID}}">{{.Descricao}}</option>
                     {{end}}
                 </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="adjudicatario">Adjudicatário (Email):</label>
+                <input type="email" id="adjudicatario" name="adjudicatario" list="email-list">
+                <datalist id="email-list">
+                    {{range .Emails}}
+                    <option value="{{.}}">
+                    {{end}}
+                </datalist>
             </div>
         </div>
         
@@ -210,6 +223,8 @@
 .form-group input[type="number"],
 .form-group input[type="date"],
 .form-group input[type="time"],
+.form-group input[type="url"],
+.form-group input[type="email"],
 .form-group select {
     width: 100%;
     padding: 0.75rem;
@@ -223,6 +238,8 @@
 .form-group input[type="number"]:focus,
 .form-group input[type="date"]:focus,
 .form-group input[type="time"]:focus,
+.form-group input[type="url"]:focus,
+.form-group input[type="email"]:focus,
 .form-group select:focus {
     outline: none;
     border-color: #60a5fa;

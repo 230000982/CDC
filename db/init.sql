@@ -9,6 +9,7 @@ CREATE TABLE user (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     cargo_id INT,
+    failed_attempts INT DEFAULT 0,
     FOREIGN KEY (cargo_id) REFERENCES cargo(id_cargo)
 );
 
@@ -62,10 +63,18 @@ CREATE TABLE concurso (
     recurso BOOLEAN,
     impugnacao BOOLEAN,
     estado_id INT,
+    link VARCHAR(255),
+    adjudicatario VARCHAR(255),
+    resultado_id INT,
+    FOREIGN KEY (resultado_id) REFERENCES resultado(id_resultado),
     FOREIGN KEY (tipo_id) REFERENCES tipo(id_tipo),
     FOREIGN KEY (plataforma_id) REFERENCES plataforma(id_platforma),
     FOREIGN KEY (estado_id) REFERENCES estado(id_estado)
 );
+
+INSERT INTO resultado (id_resultado, descricao) VALUES (1, '');
+INSERT INTO resultado (id_resultado, descricao) VALUES (2, 'Ganho');
+INSERT INTO resultado (id_resultado, descricao) VALUES (3, 'Concorrência');
 
 INSERT INTO cargo (id_cargo, descricao) VALUES (1, 'admin');
 INSERT INTO cargo (id_cargo, descricao) VALUES (2, 'SAV');
@@ -98,9 +107,27 @@ INSERT INTO estado (id_estado, descricao) VALUES (5, 'Declaração');
 INSERT INTO concurso (
     referencia, entidade, dia_erro, hora_erro, dia_proposta, hora_proposta, preco, 
     tipo_id, plataforma_id, referencia_bc, preliminar, dia_audiencia, hora_audiencia, 
-    final, recurso, impugnacao, estado_id
+    final, recurso, impugnacao, estado_id, link, adjudicatario, resultado_id
 ) 
 VALUES (
-    '123456789', 'Municipio Peniche', '2025-03-20', '10:00', '2025-03-22', '14:00', 10000, 
-    1, 2, 'BC1234', TRUE, '2025-03-23', '09:00', FALSE, TRUE, FALSE, 1
+    '987654321',                         -- referencia
+    'Câmara Municipal de Lisboa',       -- entidade
+    '2025-04-10',                       -- dia_erro
+    '09:30',                            -- hora_erro
+    '2025-04-12',                       -- dia_proposta
+    '15:00',                            -- hora_proposta
+    25000.00,                           -- preco
+    2,                                  -- tipo_id (CTE)
+    3,                                  -- plataforma_id (vortal)
+    'BC5678',                           -- referencia_bc
+    TRUE,                               -- preliminar
+    '2025-04-14',                       -- dia_audiencia
+    '10:00',                            -- hora_audiencia
+    FALSE,                              -- final
+    FALSE,                              -- recurso
+    FALSE,                              -- impugnacao
+    2,                                  -- estado_id (Em Andamento)
+    'https://concursos.gov.pt/987654321', -- link
+    'notbeso2000@gmail.com',            -- adjudicatario
+    2                                   -- resultado_id (Ganho)
 );

@@ -65,6 +65,7 @@ func SetupRoutes(db *sql.DB, cfg *config.Config) http.Handler {
 	adminOnly.HandleFunc("/users/edit/{id}", userHandler.Edit).Methods("GET")
 	adminOnly.HandleFunc("/users/update/{id}", userHandler.Update).Methods("POST")
 	adminOnly.HandleFunc("/users/delete/{id}", userHandler.Delete).Methods("GET", "POST")
+	adminOnly.HandleFunc("/users/reset/{id}", userHandler.Reset).Methods("GET", "POST")
 
 	// Serve static files
 	fs := http.FileServer(http.Dir("./static"))

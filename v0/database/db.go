@@ -127,8 +127,8 @@ func GetEstados(db *sql.DB) ([]struct {
 	return estados, nil
 }
 
-// GetAdjudicatarios retrieves all adjudicatarios from the database
-func GetAdjudicatarios(db *sql.DB) ([]struct {
+// GetResultados retrieves all resultados from the database
+func GetResultados(db *sql.DB) ([]struct {
 	ID        int
 	Descricao string
 }, error) {
@@ -138,26 +138,26 @@ func GetAdjudicatarios(db *sql.DB) ([]struct {
 	}
 	defer rows.Close()
 
-	var resultado []struct {
+	var resultados []struct {
 		ID        int
 		Descricao string
 	}
 	for rows.Next() {
-		var a struct {
+		var r struct {
 			ID        int
 			Descricao string
 		}
-		if err := rows.Scan(&a.ID, &a.Descricao); err != nil {
+		if err := rows.Scan(&r.ID, &r.Descricao); err != nil {
 			return nil, err
 		}
-		resultado = append(resultado, a)
+		resultados = append(resultados, r)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return resultado, nil
+	return resultados, nil
 }
 
 // GetEmailsFromDB retrieves emails from the database for notification
@@ -173,6 +173,30 @@ func GetEmailsFromDB(db *sql.DB) ([]string, error) {
 	}
 	defer rows.Close()
 
+	for rows.Next() {
+		var email string
+		if err := rows.Scan(&email); err != nil {
+			return nil, err
+		}
+		emails = append(emails, email)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return emails, nil
+}
+
+// GetAllEmails retrieves all emails from the user table
+func GetAllEmails(db *sql.DB) ([]string, error) {
+	rows, err := db.Query("SELECT email FROM user")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var emails []string
 	for rows.Next() {
 		var email string
 		if err := rows.Scan(&email); err != nil {

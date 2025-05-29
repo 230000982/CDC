@@ -1,0 +1,135 @@
+{{ define "content" }}
+<div class="user-form-container">    
+    <form action="/admin/users/update/{{.Target.ID}}" method="POST" class="user-form">
+        <div class="form-group">
+            <label for="nome">User:</label>
+            <input type="text" id="nome" name="nome" value="{{.Target.Nome}}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="{{.Target.Email}}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Nova Password (deixar em branco para manter a atual):</label>
+            <input type="password" id="password" name="password">
+        </div>
+        
+        <div class="form-group">
+            <label for="confirm-password">Confirmar Nova Password:</label>
+            <input type="password" id="confirm-password" name="confirm-password">
+        </div>
+        
+        <div class="form-group">
+            <label for="cargo_id">Cargo:</label>
+            <select id="cargo_id" name="cargo_id" required>
+                {{range .Cargos}}
+                <option value="{{.ID}}" {{if eq .ID $.Target.CargoID}}selected{{end}}>{{.Descricao}}</option>
+                {{end}}
+            </select>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit">Guardar</button>
+            <a href="/admin/users" class="back-link">Voltar à lista de users</a>
+        </div>
+    </form>
+</div>
+{{ end }}
+
+{{ define "styles" }}
+<style>
+.user-form-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.user-form-container h2 {
+    color: #3182ce;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.user-form {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.form-actions {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-actions button {
+    background-color: #3182ce;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.form-actions button:hover {
+    background-color: #1e568a;
+}
+
+.back-link {
+    display: inline-block;
+    text-align: center;
+    color: #3182ce;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .user-form {
+        padding: 1.5rem;
+    }
+}
+</style>
+{{ end }}

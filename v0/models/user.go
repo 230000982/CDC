@@ -21,20 +21,38 @@ type Cargo struct {
 	Descricao string
 }
 
-// Authenticate checks if the provided credentials are valid
 func Authenticate(db *sql.DB, email, password string) (int, int, error) {
-	var id, cargo int
+	var id, cargo, failedAttempts int
 	var storedPassword string
 
-	err := db.QueryRow("SELECT id_user, password, cargo_id FROM user WHERE email = ?", email).Scan(&id, &storedPassword, &cargo)
+	// Primeiro verifica se o usuário existe e obtém os dados atuais
+	err := db.QueryRow("SELECT id_user, password, cargo_id, failed_attempts FROM user WHERE nome = ?", email).Scan(&id, &storedPassword, &cargo, &failedAttempts)
 	if err != nil {
 		return 0, 0, err
 	}
 
-	// Compare the provided password with the stored hash
+	// Se tiver 3 ou mais tentativas falhadas, retorna erro como se a senha estivesse incorreta
+	if failedAttempts >= 3 {
+		return 0, 0, err
+	}
+
+	// Compara a senha fornecida com o hash armazenado
 	err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(password))
 	if err != nil {
+		// Se a senha estiver errada, incrementa o contador de tentativas falhadas
+		_, updateErr := db.Exec("UPDATE user SET failed_attempts = failed_attempts + 1 WHERE nome = ?", email)
+		if updateErr != nil {
+			return 0, 0, err
+		}
 		return 0, 0, err
+	}
+
+	// Se a autenticação for bem-sucedida, reseta o contador de tentativas falhadas
+	if failedAttempts > 0 {
+		_, updateErr := db.Exec("UPDATE user SET failed_attempts = 0 WHERE nome = ?", email)
+		if updateErr != nil {
+			return 0, 0, err
+		}
 	}
 
 	return id, cargo, nil
@@ -153,4 +171,10 @@ func GetAllCargos(db *sql.DB) ([]Cargo, error) {
 	}
 
 	return cargos, nil
+}
+
+// ResetFailedAttempts reseta o contador de tentativas falhadas
+func ResetFailedAttempts(db *sql.DB, userID int) error {
+	_, err := db.Exec("UPDATE user SET failed_attempts = 0 WHERE id_user = ?", userID)
+	return err
 }

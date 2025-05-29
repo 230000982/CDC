@@ -1,10 +1,9 @@
 {{ define "content" }}
 <div class="concurso-form-container">
-    <h2>Editar Concurso</h2>
     
     <form action="/update-concurso/{{.Concurso.ID}}" method="POST" class="concurso-form">
         <div class="form-section">
-            <h3>Informações Básicas</h3>
+            <h2>Informações Básicas</h2>
             
             <div class="form-group">
                 <label for="referencia">Referência:</label>
@@ -24,6 +23,11 @@
             <div class="form-group">
                 <label for="referencia_bc">Referência BC:</label>
                 <input type="text" id="referencia_bc" name="referencia_bc" value="{{.Concurso.ReferenciaBC}}">
+            </div>
+            
+            <div class="form-group">
+                <label for="link">Link:</label>
+                <input type="url" id="link" name="link" value="{{.Concurso.Link}}" placeholder="https://...">
             </div>
             
             <div class="form-group">
@@ -78,7 +82,7 @@
         </div>
         
         <div class="form-section">
-            <h3>Relatório</h3>
+            <h2>Relatório</h2>
             
             <div class="checkbox-group">
                 <label for="preliminar">
@@ -131,13 +135,22 @@
             </div>
             
             <div class="form-group">
-                <label for="adjudicatario_id">Adjudicatário:</label>
-                <select id="adjudicatario_id" name="adjudicatario_id">
-                    <option value="1"></option>
-                    {{range .Resultado}}
-                    <option value="{{.ID}}">{{.Descricao}}</option>
+                <label for="resultado_id">Resultado:</label>
+                <select id="resultado_id" name="resultado_id">
+                    {{range .Resultados}}
+                    <option value="{{.ID}}" {{if eq .ID $.Concurso.ResultadoID}}selected{{end}}>{{.Descricao}}</option>
                     {{end}}
                 </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="adjudicatario">Adjudicatário (Email):</label>
+                <input type="email" id="adjudicatario" name="adjudicatario" value="{{.Concurso.Adjudicatario}}" list="email-list">
+                <datalist id="email-list">
+                    {{range .Emails}}
+                    <option value="{{.}}">
+                    {{end}}
+                </datalist>
             </div>
         </div>
         
@@ -207,6 +220,8 @@
 .form-group input[type="number"],
 .form-group input[type="date"],
 .form-group input[type="time"],
+.form-group input[type="url"],
+.form-group input[type="email"],
 .form-group select {
     width: 100%;
     padding: 0.75rem;
@@ -220,6 +235,8 @@
 .form-group input[type="number"]:focus,
 .form-group input[type="date"]:focus,
 .form-group input[type="time"]:focus,
+.form-group input[type="url"]:focus,
+.form-group input[type="email"]:focus,
 .form-group select:focus {
     outline: none;
     border-color: #60a5fa;
